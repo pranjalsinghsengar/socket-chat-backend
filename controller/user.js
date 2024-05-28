@@ -1,5 +1,5 @@
-const generateToken = require("../jwt_token/generateToken");
-const User = require("../schemas/userSchemas");
+import generateToken from "../jwt_token/generateToken.js";
+import User from "../schemas/userSchemas.js";
 
 async function HandlerSignUp(req, res) {
   const { name, email, password } = req.body;
@@ -18,12 +18,12 @@ async function HandlerSignUp(req, res) {
         .json({ success: false, message: "Email already in use" });
     }
     const newUser = new User({
-      name,
-      email,
-      password,
+      name: name,
+      email: email,
+      password: password
     });
     if (newUser) {
-      generateToken(newUser._id, res);
+      // generateToken(newUser._id, res);
       await newUser.save();
     }
 
@@ -64,4 +64,4 @@ async function HandlerLogout(req, res) {
   }
 }
 
-module.exports = { HandlerSignUp, HandlerLogin,HandlerLogout };
+export { HandlerSignUp, HandlerLogin,HandlerLogout };

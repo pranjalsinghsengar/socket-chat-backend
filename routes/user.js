@@ -1,9 +1,10 @@
-const express = require('express')
-const { HandlerSignUp, HandlerLogin, HandlerLogout } = require('../controller/user')
+import express from 'express'
+import { HandlerSignUp, HandlerLogin, HandlerLogout } from "../controller/user.js"
+ 
 const router = express.Router()
 
 router.post('/' , HandlerLogin)
 router.post('/signup' , HandlerSignUp)
 router.post('/logout' , HandlerLogout)
 
-module.exports = router
+export default router

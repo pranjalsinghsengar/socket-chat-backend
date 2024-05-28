@@ -1,12 +1,13 @@
-const express = require("express");
-const cors = require("cors");
+import io from "socket.io"
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import userRoute from "./routes/user.js";
+import messageRoute from "./routes/message.route.js";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
 const app = express();
-const cookieParser = require("cookie-parser")
-const userRoute = require("./routes/user");
-const messageRoute = require("./routes/message.route");
-const { default: mongoose } = require("mongoose");
-const { HandlerSignUp } = require("./controller/user");
-const dotenv = require("dotenv");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -26,11 +27,14 @@ mongoose
   )
   .then(() => {
     console.log("connected to db");
+  })
+  .catch((error) => {
+    console.error("Error connecting to database:", error);
   });
 
 app.use("/", userRoute);
 app.use("/", messageRoute);
 
-app.listen(8000, () => {
+app.listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);
 });

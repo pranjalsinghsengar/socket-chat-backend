@@ -1,10 +1,9 @@
-const sendMessage = require('../controller/sendMessage');
+import express from 'express';
+import sendMessage from '../controller/sendMessage.js';
+import protectedRoute from '../middleware/protectedRoute.js';
 
-const express = require('express');
-const protectedRoute = require('../middleware/protectedRoute');
+const router = express.Router();
 
-const router = express.Router()
+router.post('/sent/:id', protectedRoute, sendMessage);
 
-router.post("/sent/:id",protectedRoute, sendMessage )
-
-module.exports = router
+export default router;
