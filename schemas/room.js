@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
-const conversationSchema = new mongoose.Schema({
+const RoomSchema = new mongoose.Schema({
+  roomName: {
+    type: String,
+    required: true,
+  },
   participants: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,11 +25,7 @@ const conversationSchema = new mongoose.Schema({
       },
     },
   ],
-  lastUpdated: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, {timestamps:true});
 
-const Conversation = mongoose.model("Conversation", conversationSchema);
-export default Conversation;
+const Room = mongoose.model("Room", RoomSchema);
+export default Room;

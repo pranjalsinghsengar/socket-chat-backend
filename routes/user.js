@@ -3,7 +3,7 @@ import { HandlerSignUp, HandlerLogin, HandlerLogout } from "../controller/user.j
  
 const router = express.Router()
 
-router.post('/' , HandlerLogin)
+router.post('/login' , HandlerLogin)
 router.post('/signup' , HandlerSignUp)
 router.post('/logout' , HandlerLogout)
 
