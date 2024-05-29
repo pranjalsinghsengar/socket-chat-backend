@@ -134,17 +134,31 @@ io.on("connection", (socket) => {
   socket.on("join room", async ({ roomName, user_ID }) => {
     try {
       const isRoomAvailable = await Room.findOne({ roomName });
+
       if (!isRoomAvailable) {
         socket.emit("error", "Room not available");
         console.log("error", "Room not available");
         return;
       }
-      isRoomAvailable.participants.push(user_ID);
-
+      const isAlreadyJoined = await isRoomAvailable.participants.includes(
+        user_ID
+      );
+      if (!isAlreadyJoined) {
+        isRoomAvailable.participants.push(user_ID);
+      }
       await isRoomAvailable.save();
       console.log("User Joined in room");
       socket.emit("join room", isRoomAvailable);
+      console.log("isAlreadyJoined", isAlreadyJoined);
     } catch (err) {
+      console.error("Error sending message:", err);
+      socket.emit("error", "Server error");
+    }
+  });
+
+  socket.on("room users", async ({}) => {
+    try {
+    } catch (error) {
       console.error("Error sending message:", err);
       socket.emit("error", "Server error");
     }
