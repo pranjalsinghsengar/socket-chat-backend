@@ -115,7 +115,7 @@ io.on("connection", (socket) => {
 
   socket.on("create room", async ({ roomName, user_ID }) => {
     try {
-      const room = await Room.findById({ roomName });
+      const room = await Room.findOne({ roomName });
       if (room) {
         socket.emit("error", "Room already exists");
         console.log("Room already exists");
@@ -136,12 +136,14 @@ io.on("connection", (socket) => {
       const isRoomAvailable = await Room.findOne({ roomName });
       if (!isRoomAvailable) {
         socket.emit("error", "Room not available");
+        console.log("error", "Room not available");
+        return;
       }
       isRoomAvailable.participants.push(user_ID);
-      
-      await isRoomAvailable.save();
 
-      socket.emit("join room", isRoomAvailable)
+      await isRoomAvailable.save();
+      console.log("User Joined in room");
+      socket.emit("join room", isRoomAvailable);
     } catch (err) {
       console.error("Error sending message:", err);
       socket.emit("error", "Server error");
