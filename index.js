@@ -147,8 +147,10 @@ io.on("connection", (socket) => {
         isRoomAvailable.participants.push(user_ID);
       }
       await isRoomAvailable.save();
-      console.log("User Joined in room");
+      socket.join(isRoomAvailable._id.toString());
       socket.emit("join room", isRoomAvailable);
+
+      console.log("User Joined in room");
       console.log("isAlreadyJoined", isAlreadyJoined);
     } catch (err) {
       console.error("Error sending message:", err);
@@ -156,11 +158,47 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("room users", async ({}) => {
+  socket.on("all joined rooms", async ({ user_ID }) => {
+    const userInRoom = await Room.find({
+      participants: { $in: [user_ID] },
+    });
+    // console.log(userInRoom);
+    socket.emit("all joined rooms", userInRoom);
+  });
+
+  socket.on("room users", async ({ user_ID }) => {
     try {
+      let userDetails = [];
+      for (let id = 0; id < user_ID.length; id++) {
+        // console.log("id >>", user_ID[id]);
+        const { _id, name, email } = await User.findById(user_ID[id]);
+        userDetails.push({ _id, name, email });
+      }
+      socket.emit("room users", userDetails);
+      // console.log("room users >> ", userDetails);
     } catch (error) {
       console.error("Error sending message:", err);
       socket.emit("error", "Server error");
+    }
+  });
+
+  socket.on("room chat", async ({ roomId, senderId, message }) => {
+    // console.log("=====>>>>",roomId, senderId, message)
+    try {
+      const isRoomAvailable = await Room.findOne({ _id: roomId });
+
+      if (!isRoomAvailable) {
+        socket.emit("error", "room chat error from backend");
+      }
+      console.log(isRoomAvailable);
+      isRoomAvailable.messages.push({ senderId, message });
+      // socket.emit("room chat", isRoomAvailable)
+      isRoomAvailable.save();
+
+      io.to(roomId).emit("room chat", isRoomAvailable);
+    } catch (error) {
+      console.error("Error creating room:", error);
+      socket.emit("error", "room chat error from backend");
     }
   });
 
@@ -172,3 +210,7 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// socket.on("leave room", async ()=>{
+
+// })
