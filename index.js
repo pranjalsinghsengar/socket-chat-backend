@@ -61,14 +61,24 @@ io.on("connection", (socket) => {
   //   currentMessage.save()
   //   socket.emit("currentMessage",currentMessage)
   // })
+  socket.on("user", async ({user_ID}) => {
+    try {
+      const user = User.findOne({user_ID})
+      console.log("===========>",user)
+      
+    } catch (error) {
+      socket.emit("error", "finding user");
+      
+    }
+  })
 
   socket.on("login", async () => {
     try {
       const users = await User.find({}, "_id email name"); // Adjust the fields as per your User schema
       socket.emit("userlist", users);
       // =======================================
-      const message = await Message.find({}, "_id senderId receiverId message");
-      socket.emit("message", message);
+      // const message = await Message.find({}, "_id senderId receiverId message");
+      // socket.emit("message", message);
     } catch (err) {
       console.error("Error fetching users:", err);
     }
@@ -140,7 +150,7 @@ io.on("connection", (socket) => {
         console.log("error", "Room not available");
         return;
       }
-      const isAlreadyJoined = await isRoomAvailable.participants.includes(
+      const isAlreadyJoined =  isRoomAvailable.participants.includes(
         user_ID
       );
       if (!isAlreadyJoined) {
@@ -148,10 +158,21 @@ io.on("connection", (socket) => {
       }
       await isRoomAvailable.save();
       socket.join(isRoomAvailable._id.toString());
-      socket.emit("join room", isRoomAvailable);
+      
+      let roomChat = []
+      for(let i=0; i < isRoomAvailable.messages.length; i++){
+        const {senderId, message} = isRoomAvailable.messages[i];
+        if(senderId){
 
-      console.log("User Joined in room");
-      console.log("isAlreadyJoined", isAlreadyJoined);
+          const {name } = await User.findById(senderId);
+          roomChat.push({name,senderId, message})
+          
+          // console.log(name, senderId, message);
+        }
+      }
+      socket.emit("join room", isRoomAvailable,roomChat);
+     
+      // console.log("roomChat",roomChat);
     } catch (err) {
       console.error("Error sending message:", err);
       socket.emit("error", "Server error");
@@ -162,8 +183,10 @@ io.on("connection", (socket) => {
     const userInRoom = await Room.find({
       participants: { $in: [user_ID] },
     });
-    // console.log(userInRoom);
     socket.emit("all joined rooms", userInRoom);
+
+    
+    // console.log(userInRoom);
   });
 
   socket.on("room users", async ({ user_ID }) => {
@@ -182,20 +205,50 @@ io.on("connection", (socket) => {
     }
   });
 
+
+  // socket.on("user in room", async ({roomMessages}) => {
+  //   let roomChat = []
+  //   // console.log("roomMessages",roomMessages)
+  //   for(let i =0; i<roomMessages.length; i++){
+  //     const {senderId, message} =  roomMessages[i]
+  //     const {name } = await User.findById(senderId);
+      
+  //     // console.log("isRoomAvailable >>",name, senderId, message)
+  //   }
+
+  // })
+
   socket.on("room chat", async ({ roomId, senderId, message }) => {
     // console.log("=====>>>>",roomId, senderId, message)
     try {
-      const isRoomAvailable = await Room.findOne({ _id: roomId });
+     
 
+      const isRoomAvailable = await Room.findOne({ _id: roomId });
+      
       if (!isRoomAvailable) {
         socket.emit("error", "room chat error from backend");
       }
-      console.log(isRoomAvailable);
       isRoomAvailable.messages.push({ senderId, message });
-      // socket.emit("room chat", isRoomAvailable)
-      isRoomAvailable.save();
+      await isRoomAvailable.save();
+      
+      let roomChat = [];
 
-      io.to(roomId).emit("room chat", isRoomAvailable);
+      const messages = isRoomAvailable.messages;
+
+      const users = await Promise.all(
+        messages.map(async (message) => {
+          const { senderId, message: msg } = message;
+          const user = await User.findById(senderId);
+          return { name: user.name, senderId, message: msg };
+        })
+      );
+      roomChat.push(...users);
+
+      console.log("isRoomAvailable >>", roomChat);
+     
+     socket.emit("room chat",roomChat)
+
+      io.to(roomId).emit("room chat", roomChat);
     } catch (error) {
       console.error("Error creating room:", error);
       socket.emit("error", "room chat error from backend");
