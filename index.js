@@ -30,11 +30,11 @@ mongoose
   .connect(
     process.env.MONGODB_URI ||
       // "mongodb+srv://pranjalsengar:pranjalsengar@cluster0.gdh4ggy.mongodb.net/",
-      "mongodb+srv://shivamsengar:shivamsengar@cluster0.72wcey2.mongodb.net/",
-    {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    }
+      "mongodb+srv://shivamsengar:shivamsengar@cluster0.72wcey2.mongodb.net/"
+    // {
+    //   useUnifiedTopology: true,
+    //   useNewUrlParser: true,
+    // }
   )
   .then(() => {
     console.log("Connected to DB");
@@ -266,10 +266,8 @@ io.on("connection", (socket) => {
     }
   });
 
-
-
-  socket.on("confrence:call", ({to,offer}) => {
-    io.to(to).emit(" ", {from:socket.id, offer})
+  socket.on("confrence:call", ({ to, offer }) => {
+    io.to(to).emit(" ", { from: socket.id, offer });
   });
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
