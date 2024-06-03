@@ -30,7 +30,7 @@ mongoose
   .connect(
     process.env.MONGODB_URI ||
       // "mongodb+srv://pranjalsengar:pranjalsengar@cluster0.gdh4ggy.mongodb.net/",
-      "mongodb+srv://shivamsengar:shivamsengar@cluster0.72wcey2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+      "mongodb+srv://shivamsengar:shivamsengar@cluster0.72wcey2.mongodb.net/",
     {
       useUnifiedTopology: true,
       useNewUrlParser: true,
