@@ -29,7 +29,8 @@ const PORT = process.env.PORT || 8000;
 mongoose
   .connect(
     process.env.MONGODB_URI ||
-      "mongodb+srv://pranjalsengar:pranjalsengar@cluster0.gdh4ggy.mongodb.net/",
+      // "mongodb+srv://pranjalsengar:pranjalsengar@cluster0.gdh4ggy.mongodb.net/",
+      "mongodb+srv://shivamsengar:shivamsengar@cluster0.72wcey2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
     {
       useUnifiedTopology: true,
       useNewUrlParser: true,
